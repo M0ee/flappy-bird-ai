@@ -20,6 +20,7 @@ pipe_speed = 3
 
 pipes = []
 
+
 def create_pipe():
     y_pos = random.randint(200, 400)
     top = pygame.transform.flip(pipe_img, False, True)
@@ -31,6 +32,40 @@ pipes.append(create_pipe())
 clock = pygame.time.Clock()
 base_x = 0
 
+bird_imgs = [
+    pygame.image.load("sprites/upflap.png").convert_alpha(),
+    pygame.image.load("sprites/midflap.png").convert_alpha(),
+    pygame.image.load("sprites/downflap.png").convert_alpha()
+]
+
+class Bird:
+    def __init__(self):
+        self.x = 100
+        self.y = HEIGHT // 2
+        self.gravity = 0
+        self.flap_index = 0
+        self.flap_timer = 0
+        self.image = bird_imgs[0]
+
+    def update(self):
+        
+        self.gravity += 0.5
+        self.y += self.gravity
+
+        
+        self.flap_timer += 1
+        if self.flap_timer >= 5:
+            self.flap_timer = 0
+            self.flap_index = (self.flap_index + 1) % len(bird_imgs)
+            self.image = bird_imgs[self.flap_index]
+
+    def jump(self):
+        self.gravity = -8 
+
+    def draw(self, screen):
+        screen.blit(self.image, (self.x, self.y))
+
+bird = Bird()
 running = True
 while running:
     clock.tick(60)  
@@ -58,6 +93,14 @@ while running:
         base_x = 0
     screen.blit(base_img, (base_x, HEIGHT - 100))
     screen.blit(base_img, (base_x + WIDTH, HEIGHT - 100))
+
+    bird.update()
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_SPACE]:
+        bird.jump()
+
+    bird.draw(screen)
 
     pygame.display.update()
 
