@@ -8,6 +8,8 @@ pygame.init()
 WIDTH, HEIGHT = 400, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Flappy Bird")
+score = 0
+font = pygame.font.SysFont("Arial", 32)
 
 bg_img = pygame.transform.scale(pygame.image.load("sprites/background.png").convert(), (WIDTH, HEIGHT))
 base_img = pygame.transform.scale(pygame.image.load("sprites/base.png").convert_alpha(), (WIDTH, 100))
@@ -25,7 +27,7 @@ def create_pipe():
     y_pos = random.randint(200, 400)
     top = pygame.transform.flip(pipe_img, False, True)
     bottom = pipe_img
-    return {"top": top, "bottom": bottom, "x": WIDTH, "y": y_pos}
+    return {"top": top, "bottom": bottom, "x": WIDTH, "y": y_pos, "scored": False}
 
 pipes.append(create_pipe())
 
@@ -89,6 +91,11 @@ while running:
         screen.blit(pipe['top'], (pipe['x'], pipe['y'] - pipe_gap - pipe_height))
         screen.blit(pipe['bottom'], (pipe['x'], pipe['y']))
 
+        if not pipe['scored'] and pipe['x'] + pipe_width < bird.x:
+            score += 1
+            pipe['scored'] = True
+            print("Score:", score)
+
     if pipes[-1]['x'] < WIDTH - 200:
         pipes.append(create_pipe())
 
@@ -126,7 +133,9 @@ while running:
         bird.jump()
 
     bird.draw(screen)
-
+    score_surface = font.render(str(score), True, (255, 255, 255))
+    screen.blit(score_surface, (WIDTH // 2, 50))
+    
     pygame.display.update()
 
 pygame.quit()
