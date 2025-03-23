@@ -65,16 +65,23 @@ class Bird:
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))
 
+    def get_rect(self):
+        return pygame.Rect(self.x, self.y, self.image.get_width(), self.image.get_height())
+
+
 bird = Bird()
 running = True
 while running:
-    clock.tick(60)  
+    clock.tick(60)
+    bird_rect = bird.get_rect()
+    hit_pipe = False
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
     screen.blit(bg_img, (0, 0))
+    pygame.draw.rect(screen, (255, 0, 0), bird_rect, 2)
 
     for pipe in pipes:
         pipe['x'] -= pipe_speed
@@ -87,6 +94,24 @@ while running:
 
     if pipes[0]['x'] < -pipe_width:
         pipes.pop(0)
+    
+    for pipe in pipes:
+        top_pipe_rect = pygame.Rect(pipe['x'], pipe['y'] - pipe_gap - pipe_height, pipe_width, pipe_height)
+        bottom_pipe_rect = pygame.Rect(pipe['x'], pipe['y'], pipe_width, pipe_height)
+
+        pygame.draw.rect(screen, (0, 255, 0), top_pipe_rect, 2)
+        pygame.draw.rect(screen, (0, 255, 0), bottom_pipe_rect, 2)
+
+        if bird_rect.colliderect(top_pipe_rect) or bird_rect.colliderect(bottom_pipe_rect):
+            hit_pipe = True
+            break
+
+    hit_ground = bird.y + bird.image.get_height() >= HEIGHT - 100
+
+
+    if hit_pipe or hit_ground:
+        print("💥 Collision detected! Game Over.")
+        running = False
 
     base_x -= pipe_speed
     if base_x <= -WIDTH:
